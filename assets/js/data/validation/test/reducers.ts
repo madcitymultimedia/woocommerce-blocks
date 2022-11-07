@@ -163,7 +163,11 @@ describe( 'Validation reducer', () => {
 				hidden: false,
 			},
 			testError: {
+<<<<<<< HEAD
 				message: 'This is error should also be removed',
+=======
+				message: 'This is error should not be removed',
+>>>>>>> 8ae66adf3 (Add tests for CLEAR_VALIDATION_ERRORS)
 				hidden: false,
 			},
 		};
