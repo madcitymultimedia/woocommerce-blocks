@@ -87,8 +87,10 @@ const Block = ( { attributes, children, scrollToTop } ) => (
 		<StoreNoticesContainer context="wc/cart" />
 		<SlotFillProvider>
 			<CartProvider>
-				<Cart attributes={ attributes }>{ children }</Cart>
-				<ScrollOnError scrollToTop={ scrollToTop } />
+				<CartEventsProvider>
+					<Cart attributes={ attributes }>{ children }</Cart>
+					<ScrollOnError scrollToTop={ scrollToTop } />
+				</CartEventsProvider>
 			</CartProvider>
 		</SlotFillProvider>
 	</BlockErrorBoundary>
