@@ -62,10 +62,11 @@ export const useStoreCartItemQuantity = (
 	const {
 		quantity_limits: quantityLimits,
 	}: { quantity_limits: CartItem[ 'quantity_limits' ] } = cartItem;
+
 	const isValidQuantity =
-		quantityLimits.maximum >= debouncedQuantity &&
-		quantityLimits.minimum <= debouncedQuantity &&
-		debouncedQuantity % quantityLimits.multiple_of === 0;
+		quantityLimits?.maximum >= debouncedQuantity &&
+		quantityLimits?.minimum <= debouncedQuantity &&
+		debouncedQuantity % quantityLimits?.multiple_of === 0;
 
 	const previousDebouncedQuantity = usePrevious( debouncedQuantity );
 	const { removeItemFromCart, changeCartItemQuantity } =
