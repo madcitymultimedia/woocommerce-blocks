@@ -12,8 +12,11 @@ import {
 import classnames from 'classnames';
 import { withInstanceId } from '@wordpress/compose';
 import { isObject, isString } from '@woocommerce/types';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { dispatch, useDispatch, useSelect } from '@wordpress/data';
+import {
+	VALIDATION_STORE_KEY,
+	STORE_NOTICES_STORE_KEY,
+} from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -38,6 +41,7 @@ interface ValidatedTextInputProps
 	onChange: ( newValue: string ) => void;
 	label?: string | undefined;
 	value: string;
+	noticeContext?: string | undefined;
 }
 
 const ValidatedTextInput = ( {
@@ -51,6 +55,7 @@ const ValidatedTextInput = ( {
 	showError = true,
 	errorMessage: passedErrorMessage = '',
 	value = '',
+	noticeContext,
 	...rest
 }: ValidatedTextInputProps ): JSX.Element => {
 	const [ isPristine, setIsPristine ] = useState( true );
@@ -70,34 +75,72 @@ const ValidatedTextInput = ( {
 		};
 	} );
 
+	// For store notices, register the container context with the parent.
+	const { registerContainer, unregisterContainer } = useDispatch(
+		STORE_NOTICES_STORE_KEY
+	);
+
+	useEffect( () => {
+		if ( noticeContext ) {
+			registerContainer( noticeContext );
+		}
+		return () => {
+			if ( noticeContext ) {
+				unregisterContainer( noticeContext );
+			}
+		};
+	}, [ noticeContext, registerContainer, unregisterContainer ] );
+
+	const notices = useSelect(
+		( select ) => {
+			return select( 'core/notices' )
+				.getNotices( noticeContext )
+				.filter( ( notice ) => notice.status === 'error' );
+		},
+		[ noticeContext ]
+	);
+
+	const clearNotices = useCallback( () => {
+		const { removeNotice } = dispatch( 'core/notices' );
+		notices.forEach( ( notice ) => {
+			removeNotice( notice.id, noticeContext );
+		} );
+	}, [ noticeContext, notices ] );
+
 	const validateInput = useCallback(
 		( errorsHidden = true ) => {
-			const inputObject = inputRef.current || null;
-			if ( ! inputObject ) {
+			if ( ! inputRef.current ) {
 				return;
 			}
-			// Trim white space before validation.
-			inputObject.value = inputObject.value.trim();
-			const inputIsValid = inputObject.checkValidity();
-			if ( inputIsValid ) {
+			const inputObject = inputRef.current;
+			inputObject.value = inputObject.value.trim(); // Trim white space before validation.
+
+			if ( inputObject.checkValidity() && notices.length === 0 ) {
 				clearValidationError( errorIdString );
-			} else {
-				const validationErrors = {
-					[ errorIdString ]: {
-						message:
-							inputObject.validationMessage ||
-							__(
-								'Invalid value.',
-								'woo-gutenberg-products-block'
-							),
-						hidden: errorsHidden,
-					},
-				};
-				setValidationErrors( validationErrors );
+				return;
 			}
+
+			const validationErrors = {
+				[ errorIdString ]: {
+					message:
+						inputObject.validationMessage ||
+						notices[ 0 ]?.content ||
+						__(
+							'The provided value is invalid',
+							'woo-gutenberg-products-block'
+						),
+					hidden: errorsHidden,
+				},
+			};
+			setValidationErrors( validationErrors );
 		},
-		[ clearValidationError, errorIdString, setValidationErrors ]
+		[ clearValidationError, errorIdString, setValidationErrors, notices ]
 	);
+
+	// Trigger validation when notices change.
+	useEffect( () => {
+		validateInput( false );
+	}, [ notices, validateInput ] );
 
 	/**
 	 * Focus on mount
@@ -168,6 +211,8 @@ const ValidatedTextInput = ( {
 			ref={ inputRef }
 			onChange={ ( val ) => {
 				hideValidationError( errorIdString );
+				clearNotices();
+				validateInput( true );
 				onChange( val );
 			} }
 			ariaDescribedBy={ describedBy }

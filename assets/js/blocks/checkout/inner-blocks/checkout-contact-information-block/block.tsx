@@ -69,6 +69,7 @@ const Block = ( {
 				autoComplete="email"
 				onChange={ onChangeEmail }
 				required={ true }
+				noticeContext={ noticeContexts.EMAIL_ADDRESS }
 			/>
 			{ createAccountUI }
 		</>
