@@ -28,7 +28,7 @@ const Block = ( {
 	className: string;
 	buttonLabel: string;
 } ): JSX.Element => {
-	const link = getSetting( 'page-' + checkoutPageId, false );
+	const link = getSetting< string >( 'page-' + checkoutPageId, false );
 	const isCalculating = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).isCalculating()
 	);
@@ -58,10 +58,11 @@ const Block = ( {
 		};
 	}, [] );
 
+	const linkToRender = link ? link : CHECKOUT_URL;
 	const submitContainerContents = (
 		<Button
 			className="wc-block-cart__submit-button"
-			href={ link || CHECKOUT_URL }
+			href={ linkToRender ? linkToRender : undefined }
 			disabled={ isCalculating }
 			onClick={ () => setShowSpinner( true ) }
 			showSpinner={ showSpinner }
