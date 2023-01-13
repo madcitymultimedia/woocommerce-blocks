@@ -20,7 +20,8 @@ const FrontendBlock = ( {
 	children: JSX.Element | JSX.Element[];
 	className: string;
 } ): JSX.Element | null => {
-	const { cartItems, cartIsLoading, cartItemErrors } = useStoreCart();
+	const { cartItems, cartIsLoading, cartItemErrors, cartErrors } =
+		useStoreCart();
 	const { hasDarkControls } = useCartBlockContext();
 	const { createErrorNotice, removeNotice } = useDispatch( 'core/notices' );
 
@@ -45,19 +46,16 @@ const FrontendBlock = ( {
 		} );
 
 		// Ensures any cart errors listed in the API response get shown.
-		cartItemErrors.forEach( ( error ) => {
+		[ ...cartItemErrors, ...cartErrors ].forEach( ( error ) => {
 			createErrorNotice( decodeEntities( error.message ), {
 				isDismissible: true,
 				id: error.code,
 				context: 'wc/cart',
 			} );
 		} );
-	}, [
-		createErrorNotice,
-		cartItemErrors,
-		currentlyDisplayedErrorNoticeCodes,
-		removeNotice,
-	] );
+		// @eslint-disable-next-line react-hooks/exhaustive-deps - We do not need currentlyDisplayedErrorNoticeCodes in
+		// the dependency array because that changes when the user removes dismissible notices.
+	}, [ createErrorNotice, cartItemErrors, cartErrors, removeNotice ] );
 
 	if ( cartIsLoading || cartItems.length >= 1 ) {
 		return (
