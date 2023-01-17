@@ -30,11 +30,9 @@ const displayWithTax = getSetting( 'displayCartPricesIncludingTax', false );
 // https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/StoreApi/docs/cart.md#cart-response
 export const previewCart: CartResponse = {
 	coupons: [],
-	shipping_rates:
-		getSetting( 'shippingMethodsExist', false ) ||
-		getSetting( 'localPickupEnabled', false )
-			? previewShippingRates
-			: [],
+	shipping_rates: getSetting( 'shippingMethodsExist', false )
+		? previewShippingRates
+		: [],
 	items: [
 		{
 			key: '1',
