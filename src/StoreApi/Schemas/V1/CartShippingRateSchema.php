@@ -319,6 +319,17 @@ class CartShippingRateSchema extends AbstractSchema {
 	}
 
 	/**
+	 * Gets the `supports` array for the WC_Shipping_Method a given rate belongs to.
+	 *
+	 * @param WC_Shipping_Rate $rate The shipping rate whose shipping method's supports array should be found.
+	 * @return string[]              Array of supported features.
+	 */
+	protected function get_rate_supports( $rate ) {
+		$method_id = $this->get_rate_prop( $rate, 'method_id' );
+		return WC()->shipping()->shipping_methods[ $method_id ]->supports;
+	}
+
+	/**
 	 * Gets a prop of the rate object, if callable.
 	 *
 	 * @param WC_Shipping_Rate $rate Rate object.
