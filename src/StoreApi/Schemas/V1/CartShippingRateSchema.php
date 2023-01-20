@@ -210,6 +210,12 @@ class CartShippingRateSchema extends AbstractSchema {
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
+				'supports'      => [
+					'description' => __( 'List of features this shipping rate supports.', 'woo-gutenberg-products-block' ),
+					'type'        => 'array',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
 			],
 			$this->get_store_currency_properties()
 		);
@@ -314,6 +320,7 @@ class CartShippingRateSchema extends AbstractSchema {
 				'method_id'     => $this->get_rate_prop( $rate, 'method_id' ),
 				'meta_data'     => $this->get_rate_meta_data( $rate ),
 				'selected'      => $selected_rate === $this->get_rate_prop( $rate, 'id' ),
+				'supports'      => $this->get_rate_supports( $rate ),
 			]
 		);
 	}
