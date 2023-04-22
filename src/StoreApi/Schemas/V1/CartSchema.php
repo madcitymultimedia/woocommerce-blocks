@@ -398,13 +398,15 @@ class CartSchema extends AbstractSchema {
 			return $tax_lines;
 		}
 
-		$cart_tax_totals = $cart->get_tax_totals();
+		$cart_tax_totals    = $cart->get_tax_totals();
+		$shipping_tax_rates = array_keys( WC_Tax::get_shipping_tax_rates() );
 
 		foreach ( $cart_tax_totals as $cart_tax_total ) {
 			$tax_lines[] = array(
-				'name'  => $cart_tax_total->label,
-				'price' => $this->prepare_money_response( $cart_tax_total->amount, wc_get_price_decimals() ),
-				'rate'  => WC_Tax::get_rate_percent( $cart_tax_total->tax_rate_id ),
+				'name'        => $cart_tax_total->label,
+				'price'       => $this->prepare_money_response( $cart_tax_total->amount, wc_get_price_decimals() ),
+				'rate'        => WC_Tax::get_rate_percent( $cart_tax_total->tax_rate_id ),
+				'is_shipping' => in_array( $cart_tax_total->tax_rate_id, $shipping_tax_rates, true ),
 			);
 		}
 

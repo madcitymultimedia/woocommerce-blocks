@@ -153,6 +153,7 @@ export interface CartTotalsTaxLineItem {
 	name: string;
 	price: string;
 	rate: string;
+	is_shipping: boolean;
 }
 
 export interface CartFeeItemTotals extends CurrencyInfo {
