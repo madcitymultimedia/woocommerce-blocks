@@ -14,7 +14,13 @@ import {
 	LooselyMustHave,
 } from '@woocommerce/types';
 import { formatPrice } from '@woocommerce/price-format';
-
+import {
+	areShippingMethodsMissing,
+	getTotalShippingValue,
+	hasShippingRate,
+} from '@woocommerce/base-components/cart-checkout/totals/shipping/utils';
+import { useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 /**
  * Internal dependencies
  */
@@ -51,7 +57,7 @@ const TotalsFooterItem = ( {
 		getSetting< boolean >( 'taxesEnabled', true ) &&
 		getSetting< boolean >( 'displayCartPricesIncludingTax', false );
 
-	const {
+	let {
 		total_price: totalPrice,
 		total_tax: totalTax,
 		tax_lines: taxLines,
@@ -67,6 +73,32 @@ const TotalsFooterItem = ( {
 		extensions: cart.extensions,
 		arg: { cart },
 	} );
+	const { shippingRates } = useStoreCart();
+	const prefersCollection = useSelect( ( select ) => {
+		return select( CHECKOUT_STORE_KEY ).prefersCollection();
+	} );
+	const totalShippingValue = getTotalShippingValue( {
+		total_shipping_tax: values.total_shipping_tax || '0',
+		total_shipping: values.total_shipping || '0',
+	} );
+	const hasRates = hasShippingRate( shippingRates ) || totalShippingValue > 0;
+	const shippingMethodsMissing = areShippingMethodsMissing(
+		hasRates,
+		prefersCollection,
+		shippingRates
+	);
+
+	if ( shippingMethodsMissing ) {
+		totalTax = `${
+			parseInt( totalTax, 10 ) -
+			parseInt( values.total_shipping_tax || '0', 10 ) * 2
+		}`;
+		totalPrice = `${
+			parseInt( totalPrice, 10 ) -
+			parseInt( values.total_shipping_tax || '0', 10 ) * 2 -
+			parseInt( values.total_shipping || '0', 10 )
+		}`;
+	}
 
 	const parsedTaxValue = parseInt( totalTax, 10 );
 	const description =
