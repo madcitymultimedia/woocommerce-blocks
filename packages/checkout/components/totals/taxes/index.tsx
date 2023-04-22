@@ -7,6 +7,12 @@ import { getSetting } from '@woocommerce/settings';
 import type { Currency } from '@woocommerce/price-format';
 import type { CartTotalsTaxLineItem } from '@woocommerce/types';
 import type { ReactElement } from 'react';
+import { CART_STORE_KEY, CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import { useSelect } from '@wordpress/data';
+import {
+	areShippingMethodsMissing,
+	hasShippingRate,
+} from '@woocommerce/base-components/cart-checkout/totals/shipping/utils';
 
 /**
  * Internal dependencies
@@ -31,8 +37,27 @@ const TotalsTaxes = ( {
 	className,
 	showRateAfterTaxName,
 }: TotalsTaxesProps ): ReactElement | null => {
-	const { total_tax: totalTax, tax_lines: taxLines } = values;
+	let { total_tax: totalTax, tax_lines: taxLines } = values;
 
+	const { cartData, prefersCollection } = useSelect( ( select ) => {
+		return {
+			cartData: select( CART_STORE_KEY ).getCartData(),
+			prefersCollection: select( CHECKOUT_STORE_KEY ).prefersCollection(),
+		};
+	} );
+	const { shippingRates } = cartData;
+	const hasRates = hasShippingRate( shippingRates );
+	const shippingMethodsMissing = areShippingMethodsMissing(
+		hasRates,
+		prefersCollection,
+		shippingRates
+	);
+
+	if ( shippingMethodsMissing ) {
+		taxLines = taxLines.filter(
+			( { is_shipping: isShipping } ) => ! isShipping
+		);
+	}
 	if (
 		! getSetting( 'taxesEnabled', true ) &&
 		parseInt( totalTax, 10 ) <= 0
