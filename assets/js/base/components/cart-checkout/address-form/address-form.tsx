@@ -152,8 +152,13 @@ const AddressForm = ( {
 		field: string,
 		customValues: {
 			country: string;
-		}
+		},
+		required: boolean
 	): boolean => {
+		if ( ! required && ! inputObject.value ) {
+			return true;
+		}
+
 		if (
 			field === 'postcode' &&
 			customValues.country &&
@@ -268,7 +273,8 @@ const AddressForm = ( {
 							customValidationHandler(
 								inputObject,
 								field.key,
-								values
+								values,
+								field.required
 							)
 						}
 						errorMessage={ field.errorMessage }

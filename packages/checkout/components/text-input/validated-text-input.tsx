@@ -99,9 +99,15 @@ const ValidatedTextInput = ( {
 			inputObject.value = inputObject.value.trim();
 			inputObject.setCustomValidity( '' );
 
-			if ( previousValue === inputObject.value ) {
-				return;
-			}
+			// The validation is abandoned if values are the same.
+			// This is to prevent the validation from running when the required field changes.
+			// Even when focusing the field, the validation is not run if the value is the same.
+			// the code was added to fix an issue with the coupon field.
+			// https://github.com/woocommerce/woocommerce-blocks/issues/8349
+
+			// if ( previousValue === inputObject.value ) {
+			// 	return;
+			// }
 
 			const inputIsValid = customValidation
 				? inputObject.checkValidity() && customValidation( inputObject )
@@ -122,7 +128,6 @@ const ValidatedTextInput = ( {
 			} );
 		},
 		[
-			previousValue,
 			clearValidationError,
 			customValidation,
 			errorIdString,
