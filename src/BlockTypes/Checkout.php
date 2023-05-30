@@ -324,7 +324,7 @@ class Checkout extends AbstractBlock {
 					$acc[] = [
 						'id'          => $method->id,
 						'title'       => $method->method_title,
-						'description' => $method->method_description,
+						'description' => wp_trim_words( $method->method_description, 20, '...' ),
 					];
 					return $acc;
 				},
