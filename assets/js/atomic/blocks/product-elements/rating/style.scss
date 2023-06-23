@@ -94,9 +94,12 @@
 		margin: 0;
 	}
 	.wc-block-components-product-rating__container {
-		display: flex;
-		align-items: center;
-		column-gap: $gap-smaller;
+		> * {
+			vertical-align: middle;
+		}
+	}
+	.wc-block-components-product-rating__reviews_count {
+		margin-left: $gap-smaller;
 	}
 }
 
